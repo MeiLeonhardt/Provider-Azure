@@ -31,8 +31,8 @@ Con questo provider facciamo riferimento a delle **risorse cloud**, mentre con A
 ![image](https://github.com/user-attachments/assets/624417a8-c725-4641-a1de-730713080cf4)
 
 Questo servizio è disponibile sia da portale, che da Powershell, Azure CLI e API REST.
-- Resource : le risorse in Azure sono tutti gli oggetti che possono essere configurati come VM, VNet, Stroage accounts etc...
-- Resource groups : I gruppi di risorse sono contenitori logici all'interno dei quali inseriamo le risorse che abbiamo creato.
+- **Resource **: le risorse in Azure sono tutti gli oggetti che possono essere configurati come VM, VNet, Stroage accounts etc...
+- **Resource groups** : I gruppi di risorse sono contenitori logici all'interno dei quali inseriamo le risorse che abbiamo creato.
 
   Es. sto creando un'infrastruttura per lo sviluppo:
     - creo il gruppo risorse "Dev"
@@ -54,9 +54,9 @@ resource "azurerm_virtual_network" "VNet_Dev" {
 ```
  ## AzureAD
 Azure AD è il **servizio di identità** e **gestione degli accessi** di Microsoft sul cloud. Serve per:
-- Autenticare utenti e dispositivi (Single Sign-On, Multi-Factor Authentication)
-- Gestire permessi e ruoli (RBAC)
-- Integrazione con applicazioni (Microsoft 365, app custom)
+- **Autenticare** utenti e dispositivi (Single Sign-On, Multi-Factor Authentication)
+- **Gestire** permessi e ruoli (RBAC)
+- **Integrazione** con applicazioni (Microsoft 365, app custom)
 - Autenticazione per servizi cloud come Azure, Microsoft 365, e altre app SaaS
 
 Azure Provider può essere utilizzato per configuare un'infrastruttura in Azure Active Directory (Azure AD provider), utilizzando l'API Microsoft Graph.
@@ -100,13 +100,13 @@ resource "azuread_user" "example" {
 ```
 
 ## Azure DevOps
-Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo sviluppo software end-to-end (dallo sviluppo al monitoraggio). 
+Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo **sviluppo software end-to-end** (dallo sviluppo al monitoraggio). 
 Include:
-- Repos – controllo di versione Git
-- Pipelines – CI/CD per automatizzare build e deploy
-- Boards – gestione dei task (tipo Jira)
-- Test Plans – gestione e automazione dei test
-- Artifacts – hosting di pacchetti (NuGet, npm, ecc.)
+- **Repos** – controllo di versione Git
+- **Pipelines** – CI/CD per automatizzare build e deploy
+- **Boards** – gestione dei task (tipo Jira)
+- **Test Plans** – gestione e automazione dei test
+- **Artifacts** – hosting di pacchetti (NuGet, npm, ecc.)
 
 Il ****provider** ```azuredevops``` consente di gestire e configurare risorse di Azure DevOps tramite Terraform, sfruttando le REST API di Azure DevOps. Può essere usato per creare **progetti, pipeline, repository, gruppi di sicurezza, permessi**, e molto altro.
 ```
