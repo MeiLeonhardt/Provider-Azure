@@ -54,6 +54,9 @@ resource "azurerm_virtual_network" "VNet_Dev" {
 }
 ```
  ## AzureAD
+
+ ![image](https://github.com/user-attachments/assets/2b56eb85-5545-4296-8289-e3dc89c8cf21)
+
  
 Azure AD è il **servizio di identità** e **gestione degli accessi** di Microsoft sul cloud. Serve per:
 - **Autenticare** utenti e dispositivi (Single Sign-On, Multi-Factor Authentication)
@@ -103,6 +106,9 @@ resource "azuread_user" "example" {
 
 ## Azure DevOps
 
+![image](https://github.com/user-attachments/assets/3e650d28-0b74-4640-bdb1-1a5f9b27ae87)
+
+
 Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo **sviluppo software end-to-end** (dallo sviluppo al monitoraggio). 
 Include:
 - **Repos** – sistema di controllo di versione basatu su Git
@@ -143,6 +149,8 @@ Per il processo di autenticazione è possibile utilizzare il servizio principale
 
 ## Azure API Provider
 
+![image](https://github.com/user-attachments/assets/dbcb9120-e326-4c0a-bede-1e892872efda)
+
 AzAPI è un provider Terraform che ti permette di gestire risorse Azure che non sono ancora supportate (e potrebbero non essere mai supportate ) dai provider classici come ```azurerm```. Il provider azurerm segue un ciclo di rilascio più lento e potrebbe non supportare le risorse più recenti o in anteprima. 
 ```azapi``` permette di colmare questa lacuna, interfacciandosi direttamente con le API ARM.
 
@@ -181,12 +189,15 @@ resource "azapi_resource" "example" {
 ```
 ## Azure Stack
 
-AAzure Stack è pensato per ambienti con limitata connettività al cloud o esigenze di compliance, non solo per "on-premises". 
-Consente di eseguire i servizi Azure in un proprio datacenter. 
+![image](https://github.com/user-attachments/assets/ffa823de-9ce4-4c82-bb50-a195d660db5c)
+
+
+Azure Stack è pensato per ambienti con limitata connettività al cloud o esigenze di compliance, non solo per "on-premises". 
+
 Esistono diverse versioni:
-- Azure Stack Hub – piattaforma completa per eseguire servizi Azure localmente. Esegue VM, app e servizi PaaS di Azure localmente; orientato ai service provider e alle aziende con esigenze di isolamento
-- Azure Stack HCI – soluzioni ibride per infrastruttura iperconvergente. Sistema operativo per cluster iperconvergenti ottimizzati per Azure Hybrid.
-- Azure Stack Edge – appliance per elaborazione locale ed edge computing. Appliance gestita da Microsoft, per elaborazione dati in edge computing, AI locale, e carichi di lavoro offline.
+- **Azure Stack Hub** – piattaforma completa per eseguire servizi Azure localmente. Esegue VM, app e servizi PaaS di Azure localmente; orientato ai service provider e alle aziende con esigenze di isolamento
+- **Azure Stack HCI** – soluzioni ibride per infrastruttura iperconvergente. Sistema operativo per cluster iperconvergenti ottimizzati per Azure Hybrid.
+- **Azure Stack Edge**– appliance per elaborazione locale ed edge computing. Appliance gestita da Microsoft, per elaborazione dati in edge computing, AI locale, e carichi di lavoro offline.
 
 ```
 # Configure the Azure Stack Provider
@@ -237,7 +248,8 @@ Codice Terraform in un repository Git (es. main.tf)
 Service Connection verso Azure (Azure Resource Manager con SPN)
 
 2. Pipeline YAML di base
-file.yaml
+
+```file.yaml```
 ```
 trigger:
   - main
