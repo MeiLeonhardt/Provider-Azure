@@ -64,7 +64,8 @@ Azure AD è il **servizio di identità** e **gestione degli accessi** di Microso
 - **Integrazione** con applicazioni (Microsoft 365, app custom)
 - Autenticazione per servizi cloud come Azure, Microsoft 365, e altre app SaaS
 
-Azure Provider può essere utilizzato per configuare le identità e le autenticazioni in Azure Active Directory (Azure AD provider), utilizzando l'API Microsoft Graph.
+Il provider ```azuread``` di Terraform consente di gestire risorse di Azure Active Directory (es. utenti, gruppi, applicazioni, service principal), utilizzando le Microsoft Graph API. 
+Questo provider è complementare ad ```azurerm```: ```azuread``` gestisce identità e accessi (come utenti e permessi), ```azurerm``` gestisce le risorse di Azure.
 ```
 # Configure Terraform
 terraform {
