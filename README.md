@@ -2,7 +2,7 @@
 
 In Terraform, il provider è un plugin che consente di interagire con un provider in cloud per poter creare l’infrastruttura. 
 
-Quando andiamo a creare un’infrastruttura, infatti, il primo blocco sarà provvisto del comando “provider” seguito dal nome del provider, es. ```azurerm```, ```features``` e ```subscription```:
+Quando andiamo a creare un’infrastruttura, infatti, il primo blocco sarà provvisto del comando ```provider``` seguito dal nome del provider, es. ```azurerm```, ```features``` e ```subscription```:
 
 ```
 provider "azurerm" {
@@ -10,7 +10,8 @@ provider "azurerm" {
   subscription_id = Id-della-sottoscrizione
 }
 ```
-Ci sono casi in cui è necessario specificare la versione del provider che si vuole utilizzare. Questo può avvenire nel caso di infrastrutture configurate in una certa versione, o quando si sta modificando un'infrastruttura che è stata condivisa da un possibile cliente e di cui ci ha fornito i file terraform.
+Ci sono casi in cui è necessario specificare la versione del provider che si vuole utilizzare. Questo può avvenire nel caso di infrastrutture configurate in una certa versione, o quando si sta modificando un'infrastruttura che è stata condivisa da un cliente e di cui ci ha fornito i file terraform.
+
 ```
 # 1. Specify the version of the AzureRM Provider to use
 terraform {
