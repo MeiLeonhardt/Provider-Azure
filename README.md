@@ -1,41 +1,146 @@
 # Provider-Azure
 
-In Terraform, il provider è un plugin che consente di interagire con un cloud provider per poter creare l’infrastruttura all’interno di quel cloud. 
+In Terraform, il provider è un plugin che consente di interagire con un provider in cloud per poter creare l’infrastruttura. 
 
 Quando andiamo a creare un’infrastruttura, infatti, il primo blocco sarà provvisto del comando “provider” seguito dal nome del provider, es. ```azurerm```, ```features``` e ```subscription```:
 
 ```
 provider "azurerm" {
-  features {}
-  subscription_Id = Id-della-sottoscrizione
+  features {} #features è obbligatorio ma può essere lasciato vuoto
+  subscription_id = Id-della-sottoscrizione
 }
 ```
-
+Ci sono casi in cui è necessario specificare la versione del provider che si vuole utilizzare. Questo può avvenire nel caso di infrastrutture configurate in una certa versione, o quando si sta modificando un'infrastruttura che è stata condivisa da un possibile cliente e di cui ci ha fornito i file terraform.
+```
+# 1. Specify the version of the AzureRM Provider to use
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "=3.0.1"
+    }
+  }
+}
+```
 ## AzureRM
-Azure Resource Manager è il servizio di distribuzione e di gestione di Azure: permette all'utente di creare, gestire, leggere, aggiornare e cancellare risorse in Azure, tra le quali VM, Storage Accounts, VNet etc...
+Azure Resource Manager è il servizio di **distribuzione e di gestione delle risorse** in Azure: permette all'utente di creare, gestire, leggere, aggiornare e cancellare risorse in Azure, tra le quali VM, Storage Accounts, VNet etc...
+
+Con questo provider facciamo riferimento a delle **risorse cloud**, mentre con Azure AD faremo riferimento alla gestione delle **identità**.
 
 ![image](https://github.com/user-attachments/assets/624417a8-c725-4641-a1de-730713080cf4)
 
 Questo servizio è disponibile sia da portale, che da Powershell, Azure CLI e API REST.
 - Resource : le risorse in Azure sono tutti gli oggetti che possono essere configurati come VM, VNet, Stroage accounts etc...
-- Resource groups : I gruppi di risorse sono contenitori logici all'interno dei quali inseriamo le risorse che abbiamo creato. Es. sto creando un'infrastruttura per lo sviluppo:
-    - creo il gruppo risorse "Sviluppo"
-    - quando configuro una nuova risorsa, es. VM-dev, la inserisco in quel gruppo risorse
+- Resource groups : I gruppi di risorse sono contenitori logici all'interno dei quali inseriamo le risorse che abbiamo creato.
 
+  Es. sto creando un'infrastruttura per lo sviluppo:
+    - creo il gruppo risorse "Dev"
+``` 
+  resource "azurerm_resource_group" "Dev" {
+  name     = "Dev"
+  location = "West Europe"
+}
+```
+    - quando configuro una nuova risorsa, es. VNet-dev, la inserisco in quel gruppo risorse
+    
+```
+resource "azurerm_virtual_network" "VNet_Dev" {
+  name                = "VNet-Dev"
+  resource_group_name = azurerm_resource_group.Dev.name
+  location            = azurerm_resource_group.Dev.location
+  address_space       = ["10.0.0.0/16"]
+}
+```
  ## AzureAD
-Azure AD è il servizio di identità e gestione degli accessi di Microsoft sul cloud. Serve per:
+Azure AD è il **servizio di identità** e **gestione degli accessi** di Microsoft sul cloud. Serve per:
 - Autenticare utenti e dispositivi (Single Sign-On, Multi-Factor Authentication)
 - Gestire permessi e ruoli (RBAC)
 - Integrazione con applicazioni (Microsoft 365, app custom)
-- Autenticazione per servizi cloud come Azure, Microsoft 365, e migliaia di app SaaS
+- Autenticazione per servizi cloud come Azure, Microsoft 365, e altre app SaaS
+
+Azure Provider può essere utilizzato per configuare un'infrastruttura in Azure Active Directory (Azure AD provider), utilizzando l'API Microsoft Graph.
+```
+# Configure Terraform
+terraform {
+  required_providers {
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.15.0"
+    }
+  }
+}
+
+# Configure the Azure Active Directory Provider
+provider "azuread" {
+  tenant_id = "00000000-0000-0000-0000-000000000000"
+}
+
+# Retrieve domain information
+data "azuread_domains" "example" {
+  only_initial = true
+}
+
+# Create an application
+resource "azuread_application_registration" "example" {
+  display_name = "ExampleApp"
+}
+
+# Create a service principal
+resource "azuread_service_principal" "example" {
+  client_id = azuread_application_registration.example.client_id
+}
+
+# Create a user
+resource "azuread_user" "example" {
+  user_principal_name = "ExampleUser@${data.azuread_domains.example.domains.0.domain_name}"
+  display_name        = "Example User"
+  password            = "..." #in questo caso si possono usare sia le variabili, che Azure Key Vault per la gestione sicura della password
+}
+```
 
 ## Azure DevOps
-Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo sviluppo software end-to-end. Include:
+Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo sviluppo software end-to-end. 
+Include:
 - Repos – controllo di versione Git
 - Pipelines – CI/CD per automatizzare build e deploy
 - Boards – gestione dei task (tipo Jira)
 - Test Plans – gestione e automazione dei test
 - Artifacts – hosting di pacchetti (NuGet, npm, ecc.)
+
+Il **provider Azure DevOps in Terraform** viene usato per configurare un progetto Azure DevOps in Azure, usando il servizio REST API.
+```
+terraform {
+  required_providers {
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = ">= 0.1.0"
+    }
+  }
+}
+
+resource "azuredevops_project" "project" {
+  name        = "Project Name"
+  description = "Project Description"
+}
+```
+
+Per il processo di autenticazione è possibile utilizzare il servizio principale di Azure AD, attraverso EntraID, oppure tramite accesso personale con token.
+
+Il provider utilizza il metodo di autenticazione disponibile:
+- Personal Access Token
+- With ```use_oidc = true```
+  - OIDC Token
+  - OIDC Token File Path
+  - OIDC Token Request URL
+  - TFC Cloud Workload Identity Token
+- Client Certificate Path
+- Client Certificate
+- Client Secret Path
+- Client Secret
+- With ```use_msi = true```
+    - Managed Service Identity
+
+
 
 ## Azure API Provider
 AzAPI è un provider Terraform che ti permette di gestire risorse Azure che non sono ancora supportate ufficialmente dai provider classici (azurerm). Serve per usare le REST API di Azure direttamente da Terraform, utile per:
