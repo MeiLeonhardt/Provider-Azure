@@ -32,7 +32,7 @@ Con questo provider facciamo riferimento a delle **risorse cloud**, mentre con A
 ![image](https://github.com/user-attachments/assets/624417a8-c725-4641-a1de-730713080cf4)
 
 Questo servizio è disponibile sia da portale, che da Powershell, Azure CLI e API REST.
-- **Resource **: le risorse in Azure sono tutti gli oggetti che possono essere configurati come VM, VNet, Stroage accounts etc...
+- **Resource**: le risorse in Azure sono tutti gli oggetti che possono essere configurati come VM, VNet, Stroage accounts etc...
 - **Resource groups** : I gruppi di risorse sono contenitori logici all'interno dei quali inseriamo le risorse che abbiamo creato.
 
   Es. sto creando un'infrastruttura per lo sviluppo:
@@ -64,7 +64,7 @@ Azure AD è il **servizio di identità** e **gestione degli accessi** di Microso
 - **Integrazione** con applicazioni (Microsoft 365, app custom)
 - Autenticazione per servizi cloud come Azure, Microsoft 365, e altre app SaaS
 
-Azure Provider può essere utilizzato per configuare un'infrastruttura in Azure Active Directory (Azure AD provider), utilizzando l'API Microsoft Graph.
+Azure Provider può essere utilizzato per configuare le identità e le autenticazioni in Azure Active Directory (Azure AD provider), utilizzando l'API Microsoft Graph.
 ```
 # Configure Terraform
 terraform {
