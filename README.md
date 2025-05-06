@@ -240,6 +240,8 @@ _________________________________________________
 
 # Azure DevOps : creare una Pipeline con Terraform
 
+https://learn.microsoft.com/it-it/azure/developer/terraform/best-practices-integration-testing
+
 Azure DevOps: creare una Pipeline con Terraform
 Per creare una pipeline Terraform in Azure DevOps, questi sono i passaggi base:
 
