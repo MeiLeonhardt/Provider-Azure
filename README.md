@@ -99,7 +99,7 @@ resource "azuread_user" "example" {
 ```
 
 ## Azure DevOps
-Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo sviluppo software end-to-end. 
+Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo sviluppo software end-to-end (dallo sviluppo al monitoraggio). 
 Include:
 - Repos – controllo di versione Git
 - Pipelines – CI/CD per automatizzare build e deploy
@@ -107,7 +107,7 @@ Include:
 - Test Plans – gestione e automazione dei test
 - Artifacts – hosting di pacchetti (NuGet, npm, ecc.)
 
-Il **provider Azure DevOps in Terraform** viene usato per configurare un progetto Azure DevOps in Azure, usando il servizio REST API.
+Il ****provider** ```azuredevops``` consente di gestire e configurare risorse di Azure DevOps tramite Terraform, sfruttando le REST API di Azure DevOps. Può essere usato per creare **progetti, pipeline, repository, gruppi di sicurezza, permessi**, e molto altro.
 ```
 terraform {
   required_providers {
@@ -125,20 +125,15 @@ resource "azuredevops_project" "project" {
 ```
 
 Per il processo di autenticazione è possibile utilizzare il servizio principale di Azure AD, attraverso EntraID, oppure tramite accesso personale con token.
-
-Il provider utilizza il metodo di autenticazione disponibile:
-- Personal Access Token
-- With ```use_oidc = true```
-  - OIDC Token
-  - OIDC Token File Path
-  - OIDC Token Request URL
-  - TFC Cloud Workload Identity Token
-- Client Certificate Path
-- Client Certificate
-- Client Secret Path
-- Client Secret
-- With ```use_msi = true```
-    - Managed Service Identity
+**Metodi di autenticazione:**
+- Personal Access Token > per ambienti locali o pipeline. Si genera da Azure DevOps con scadenza e permessi specifici;
+- OpenID Connect per l'integrazione con sistemi automatizzati come GitHub Actions e Terraform Cloud
+    - ```use_oidc = true``` : per usare direttamente un token OIDC
+    - ```oidc_token_file_path```: percorso a un file con il token
+    - ```oidc_token_request_url```: URL per ottenere un token dinamicamente
+- Client Certificate Path : ```client_certificate_path```
+-  ```client_id ```,  ```client_secret ```,  ```tenant_id ``` : autenticazione via app registrata
+- ```use_msi = true```: : supporta Managed Identity (es. in ambienti Azure come VM, App Services)
 
 
 
