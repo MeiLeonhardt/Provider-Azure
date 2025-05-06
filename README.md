@@ -242,53 +242,105 @@ _________________________________________________
 
 https://learn.microsoft.com/it-it/azure/developer/terraform/best-practices-integration-testing
 
-Azure DevOps: creare una Pipeline con Terraform
-Per creare una pipeline Terraform in Azure DevOps, questi sono i passaggi base:
+## Test di integrazione
+I test di integrazione verificano che una modifica del codice appena introdotta non interrompa il codice esistente. In DevOps, l'integrazione continua (CI) fa riferimento a un processo che compila l'intero sistema ogni volta che la base di codice viene modificata, ad esempio quando qualcuno desidera unire una pull request in un repository Git.
 
-1. Requisiti
-Codice Terraform in un repository Git (es. main.tf)
+## Requisiti
+1. Abbonamento Azure
+2. Configurazione Terraform
+3. Progetto in Azure DevOps > https://learn.microsoft.com/it-it/azure/devops/organizations/projects/create-project?view=azure-devops&tabs=browser
+4. Estensione delle attività di build e rilascio & Terraform > https://marketplace.visualstudio.com/items?itemName=JasonBJohnson.azure-pipelines-tasks-terraform
+5. Concedere ad Azure DevOps l'accesso alla sottoscrizione di Azure: creare una connessione al servizio di Azure denominata terraform-basic-testing-azure-connection per consentire ad Azure Pipelines di connettersi alle sottoscrizioni di Azure
+6. Codice e risorse di esempio: Scaricare da GitHub il progetto di test di integrazione. La directory in cui si scarica l'esempio viene definita directory di esempio.
 
-Service Connection verso Azure (Azure Resource Manager con SPN)
+## Convalidare una configurazione Terraform locale
+Il comando terraform validate viene eseguito dalla riga di comando nella cartella che contiene i file di Terraform. Questo obiettivo principale dei comandi consiste nel convalidare la sintassi.
 
-2. Pipeline YAML di base
+1. All'interno della directory di esempio, naviga alla directory ```src```.
+
+2. Eseguire terraform init per inizializzare la directory di lavoro.
+
+```
+terraform init
+```
+3. Eseguire terraform validate per convalidare la sintassi dei file di configurazione.
+
+```
+terraform validate
+```
+**Punti chiave:**
+Viene visualizzato un messaggio che indica che la configurazione di Terraform è valida.
+
+4. Modificare il file main.tf.
+Nella riga 5 inserire un errore di digitazione che invalida la sintassi. Ad esempio, sostituire var.location con var.loaction
+
+5. Salvare il file.
+6. Eseguire di nuovo la convalida.
+```
+terraform validate
+```
+**Punti chiave:**
+Viene visualizzato un messaggio di errore che indica la riga di codice in errore e una descrizione dell'errore.
+
+### Progetto di esempio Terraform in GitHub
+https://github.com/Azure/terraform
+
+**File YAML di base**
 
 ```file.yaml```
 ```
 trigger:
-  - main
+  branches:
+    include:
+      - main
+      - develop
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  TF_VERSION: '1.5.7'
-  AZURE_SUBSCRIPTION: 'Nome-Connessione-Azure'
+  azureServiceConnection: 'terraform-basic-testing-azure-connection'
+  terraformWorkingDirectory: 'src'
 
-steps:
-- task: UseTerraform@0
-  inputs:
-    terraformVersion: $(TF_VERSION)
+stages:
+  - stage: TerraformValidation
+    displayName: "Terraform Init & Validate"
+    jobs:
+      - job: ValidateTerraform
+        displayName: "Init and Validate Terraform Config"
+        steps:
 
-- script: |
-    terraform init
-    terraform validate
-  workingDirectory: $(System.DefaultWorkingDirectory)
-  displayName: 'Init & Validate'
+          - task: Checkout@1
+            displayName: "Checkout repository"
 
-- script: |
-    terraform plan -out=tfplan
-  workingDirectory: $(System.DefaultWorkingDirectory)
-  displayName: 'Terraform Plan'
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: 'latest'
 
-- script: |
-    terraform apply -auto-approve tfplan
-  workingDirectory: $(System.DefaultWorkingDirectory)
-  displayName: 'Terraform Apply'
+          - task: TerraformTaskV4@4
+            displayName: "Terraform Init"
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(terraformWorkingDirectory)'
+              backendServiceArm: '$(azureServiceConnection)'
+
+          - task: TerraformTaskV4@4
+            displayName: "Terraform Validate"
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+              workingDirectory: '$(terraformWorkingDirectory)'
+              environmentServiceNameAzureRM: '$(azureServiceConnection)'
 ```
+### Cosa fa questa pipeline:
+- Trigger su main e develop.
+- Usa un VM Ubuntu.
+- Usa il servizio ```terraform-basic-testing-azure-connection``` per autenticarsi ad Azure.
+- Esegue terraform init e terraform validate nella cartella src/.
 
-3. Service Connection
-- Vai su Project Settings > Service connections > New connection
-- Scegli Azure Resource Manager, e configura con un Service Principal
-
-4. Terraform State
-Idealmente salva lo stato remoto in un Azure Storage Account (backend configurato in main.tf)
+### Requisiti per farla funzionare:
+1. Estensione Terraform installata in Azure DevOps:
+2. Terraform extension per Azure DevOps (_quella di JasonBJohnson o Microsoft va bene_)
+3. Una connessione al servizio ARM chiamata ```terraform-basic-testing-azure-connection```.
