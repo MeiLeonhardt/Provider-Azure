@@ -24,6 +24,7 @@ terraform {
 }
 ```
 ## AzureRM
+
 Azure Resource Manager è il servizio di **distribuzione e di gestione delle risorse** in Azure: permette all'utente di creare, gestire, leggere, aggiornare e cancellare risorse in Azure, tra le quali VM, Storage Accounts, VNet etc...
 
 Con questo provider facciamo riferimento a delle **risorse cloud**, mentre con Azure AD faremo riferimento alla gestione delle **identità**.
@@ -53,6 +54,7 @@ resource "azurerm_virtual_network" "VNet_Dev" {
 }
 ```
  ## AzureAD
+ 
 Azure AD è il **servizio di identità** e **gestione degli accessi** di Microsoft sul cloud. Serve per:
 - **Autenticare** utenti e dispositivi (Single Sign-On, Multi-Factor Authentication)
 - **Gestire** permessi e ruoli (RBAC)
@@ -100,15 +102,16 @@ resource "azuread_user" "example" {
 ```
 
 ## Azure DevOps
+
 Azure DevOps è una piattaforma di DevOps offerta da Microsoft per supportare lo **sviluppo software end-to-end** (dallo sviluppo al monitoraggio). 
 Include:
-- **Repos** – controllo di versione Git
-- **Pipelines** – CI/CD per automatizzare build e deploy
-- **Boards** – gestione dei task (tipo Jira)
-- **Test Plans** – gestione e automazione dei test
-- **Artifacts** – hosting di pacchetti (NuGet, npm, ecc.)
+- **Repos** – sistema di controllo di versione basatu su Git
+- **Pipelines** – CI/CD per automatizzare integrazione, test e rilascio; supporta YAML pipelines, multi-stage e può essere usato in ambienti multi-cloud e container...
+- **Boards** – gestione dei task o sprint
 
-Il ****provider** ```azuredevops``` consente di gestire e configurare risorse di Azure DevOps tramite Terraform, sfruttando le REST API di Azure DevOps. Può essere usato per creare **progetti, pipeline, repository, gruppi di sicurezza, permessi**, e molto altro.
+Il ****provider** ```azuredevops``` consente di gestire e configurare risorse di Azure DevOps tramite Terraform, sfruttando le REST API di Azure DevOps. 
+Può essere usato per creare **progetti, pipeline, repository** e molto altro.
+
 ```
 terraform {
   required_providers {
@@ -133,26 +136,98 @@ Per il processo di autenticazione è possibile utilizzare il servizio principale
     - ```oidc_token_file_path```: percorso a un file con il token
     - ```oidc_token_request_url```: URL per ottenere un token dinamicamente
 - Client Certificate Path : ```client_certificate_path```
--  ```client_id ```,  ```client_secret ```,  ```tenant_id ``` : autenticazione via app registrata
-- ```use_msi = true```: : supporta Managed Identity (es. in ambienti Azure come VM, App Services)
-
-
+- Autenticazione tramite Azure AD/Entra ID:
+    - ```client_id ```,  ```client_secret ```,  ```tenant_id ``` : autenticazione via app registrata
+- Managed Identity (MSI) – per ambienti Azure con identità gestita (es. VM, App Service)
+    - ```use_msi = true```: : supporta Managed Identity (es. in ambienti Azure come VM, App Services)
 
 ## Azure API Provider
-AzAPI è un provider Terraform che ti permette di gestire risorse Azure che non sono ancora supportate ufficialmente dai provider classici (azurerm). Serve per usare le REST API di Azure direttamente da Terraform, utile per:
+
+AzAPI è un provider Terraform che ti permette di gestire risorse Azure che non sono ancora supportate (e potrebbero non essere mai supportate ) dai provider classici come ```azurerm```. Il provider azurerm segue un ciclo di rilascio più lento e potrebbe non supportare le risorse più recenti o in anteprima. 
+```azapi``` permette di colmare questa lacuna, interfacciandosi direttamente con le API ARM.
+
+Serve per usare le REST API di Azure direttamente da Terraform, utile per:
 - Risorse in anteprima (preview)
 - Feature sperimentali
 - Personalizzazioni particolari
 
-## Azure Stack
-Azure Stack è una estensione di Azure per ambienti on-premises o ibridi. Consente di eseguire i servizi Azure in un proprio datacenter. Esistono diverse versioni:
-- Azure Stack Hub – piattaforma completa per eseguire servizi Azure localmente
-- Azure Stack HCI – soluzioni ibride per infrastruttura iperconvergente
-- Azure Stack Edge – appliance per elaborazione locale ed edge computing
+**Esempio di utilizzo di ```azapi```**
+```
+# We strongly recommend using the required_providers block to set the
+# Azure Provider source and version being used
+terraform {
+  required_providers {
+    azapi = {
+      source = "azure/azapi"
+    }
+  }
+}
 
+provider "azapi" {
+}
+
+resource "azapi_resource" "example" {
+  type      = "Microsoft.Authorization/roleAssignments@2020-04-01-preview"
+  name      = "example-role-assignment"
+  parent_id = data.azurerm_resource_group.example.id
+  body      = jsonencode({
+    properties = {
+      roleDefinitionId = "/subscriptions/.../roleDefinitions/..."
+      principalId      = "..."
+    }
+  })
+}
+
+```
+## Azure Stack
+
+AAzure Stack è pensato per ambienti con limitata connettività al cloud o esigenze di compliance, non solo per "on-premises". 
+Consente di eseguire i servizi Azure in un proprio datacenter. 
+Esistono diverse versioni:
+- Azure Stack Hub – piattaforma completa per eseguire servizi Azure localmente. Esegue VM, app e servizi PaaS di Azure localmente; orientato ai service provider e alle aziende con esigenze di isolamento
+- Azure Stack HCI – soluzioni ibride per infrastruttura iperconvergente. Sistema operativo per cluster iperconvergenti ottimizzati per Azure Hybrid.
+- Azure Stack Edge – appliance per elaborazione locale ed edge computing. Appliance gestita da Microsoft, per elaborazione dati in edge computing, AI locale, e carichi di lavoro offline.
+
+```
+# Configure the Azure Stack Provider
+provider "azurestack" {
+  # NOTE: we recommend pinning the version of the Provider which should be used in the Provider block
+  # version = "=0.9.0"
+}
+
+# Create a resource group
+resource "azurestack_resource_group" "test" {
+  name     = "production"
+  location = "West US"
+}
+
+# Create a virtual network within the resource group
+resource "azurestack_virtual_network" "test" {
+  name                = "production-network"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurestack_resource_group.test.location
+  resource_group_name = azurestack_resource_group.test.name
+
+  subnet {
+    name           = "subnet1"
+    address_prefix = "10.0.1.0/24"
+  }
+
+  subnet {
+    name           = "subnet2"
+    address_prefix = "10.0.2.0/24"
+  }
+
+  subnet {
+    name           = "subnet3"
+    address_prefix = "10.0.3.0/24"
+  }
+}
+```
 _________________________________________________
 
 # Azure DevOps : creare una Pipeline con Terraform
+
 Azure DevOps: creare una Pipeline con Terraform
 Per creare una pipeline Terraform in Azure DevOps, questi sono i passaggi base:
 
